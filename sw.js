@@ -1,5 +1,5 @@
 /* Gray Blackjack service worker: cache the app shell for offline play. */
-const CACHE = "gray-blackjack-v1";
+const CACHE = "gray-blackjack-v2";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./apple-touch-icon.png", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (event) => {
