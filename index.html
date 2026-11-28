@@ -272,6 +272,34 @@ button:disabled { opacity: 0.38; cursor: default; }
 #sound-btn[aria-pressed="false"] .snd-off { display: inline; }
 #sound-btn[aria-pressed="false"] { color: var(--muted); }
 @media (max-height: 700px) { .felt-rules { width: min(100%, 300px); } .top-right { gap: 6px; } }
+@media (max-width: 370px) { .icon-btn { width: 40px; height: 40px; } .top-right { gap: 6px; } .brand { font-size: 17px; } }
+
+/* ---------- training mode ---------- */
+.icon-btn.train-btn[aria-pressed="true"] { background: rgba(227,185,101,.22); color: var(--gold); box-shadow: inset 0 0 0 1.5px var(--gold); }
+.icon-btn.train-btn[aria-pressed="false"] { color: var(--muted); }
+.toggle-row small { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; max-width: 220px; line-height: 1.3; }
+.coach {
+  margin: 0 0 8px; padding: 8px 10px; border-radius: 14px; background: rgba(0,0,0,.34);
+  border: 1px solid rgba(227,185,101,.35); display: flex; flex-direction: column; gap: 5px;
+}
+.coach[hidden] { display: none; }
+.coach-head { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.coach-tag { font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); font-size: 11px; }
+.coach-acc { flex: 1; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.coach-acc b { color: var(--text); }
+.coach-reset { padding: 5px 10px; min-height: 28px; border-radius: 8px; background: rgba(255,255,255,.12); font-size: 12px; font-weight: 700; }
+.coach-fb { font-size: 13px; line-height: 1.3; padding: 6px 8px; border-radius: 9px; font-weight: 600; }
+.coach-fb.ok { background: rgba(127,220,143,.15); color: var(--win); }
+.coach-fb.bad { background: rgba(255,138,122,.16); color: var(--lose); }
+.coach-fb[hidden], .coach-rec[hidden] { display: none; }
+.coach-rec { font-size: 13px; line-height: 1.3; color: var(--text); }
+.coach-rec b { color: var(--gold); margin-right: 6px; font-size: 14px; }
+.coach-rec span { color: var(--muted); }
+@media (max-height: 700px) {
+  .coach { padding: 6px 8px; gap: 4px; margin-bottom: 6px; }
+  .coach-fb, .coach-rec { font-size: 12px; }
+  .coach-fb { padding: 4px 7px; }
+}
 
   </style>
 </head>
@@ -281,6 +309,9 @@ button:disabled { opacity: 0.38; cursor: default; }
       <h1 class="brand"><span class="mark">G</span>Blackjack</h1>
       <div class="top-right">
         <div class="bank"><span class="lbl">Bankroll</span><span class="val" id="bank">$1,000</span></div>
+        <button type="button" class="icon-btn train-btn" id="train-btn" aria-label="Training mode off" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11.5V16c0 1.4 2.7 3 6 3s6-1.6 6-3v-4.5"/><path d="M22 9v5.5"/></svg>
+        </button>
         <button type="button" class="icon-btn" id="sound-btn" aria-label="Sound on" aria-pressed="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor" stroke-width="1.5"/><g class="snd-on"><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></g><g class="snd-off"><path d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></g></svg>
         </button>
@@ -319,6 +350,15 @@ button:disabled { opacity: 0.38; cursor: default; }
       </section>
     </main>
     <div class="hint-pill" id="hint" hidden></div>
+    <section class="coach" id="coach" hidden aria-label="Training coach">
+      <div class="coach-head">
+        <span class="coach-tag">Training</span>
+        <span class="coach-acc" id="coach-acc"></span>
+        <button type="button" class="coach-reset" id="coach-reset" aria-label="Reset training accuracy">Reset</button>
+      </div>
+      <div class="coach-fb" id="coach-fb" hidden role="status" aria-live="polite"></div>
+      <div class="coach-rec" id="coach-rec" hidden><b id="coach-move"></b><span id="coach-why"></span></div>
+    </section>
     <div class="controls">
       <div class="panel" id="p-bet">
         <div class="chips" id="chips"></div>
@@ -354,6 +394,7 @@ button:disabled { opacity: 0.38; cursor: default; }
       <h2>Stats</h2>
       <div class="stats" id="stats"></div>
       <div class="toggle-row"><span>Sound effects</span><button type="button" class="switch" id="sound-switch" role="switch" aria-checked="true" aria-label="Sound effects"></button></div>
+      <div class="toggle-row"><span>Training mode<small>Shows the best play, grades every move, tracks accuracy</small></span><button type="button" class="switch" id="train-switch" role="switch" aria-checked="false" aria-label="Training mode"></button></div>
       <div class="toggle-row"><span>Basic strategy hint</span><button type="button" class="switch" id="hint-switch" role="switch" aria-checked="false" aria-label="Basic strategy hint"></button></div>
       <div class="rules">6 decks, reshuffled at 75%. Dealer hits soft 17 and peeks for blackjack. Double on any two cards, including after a split. Split up to 4 hands; split aces get one card each. Late surrender. Insurance pays 2 to 1.</div>
       <div class="row r3b">
@@ -712,55 +753,185 @@ button:disabled { opacity: 0.38; cursor: default; }
     if (g.bankroll > g.stats.best) g.stats.best = g.bankroll;
   }
 
-  // ---------- Basic strategy (6 decks, H17, DAS, late surrender) ----------
-  // Returns one of "hit" | "stand" | "double" | "split" | "surrender".
-  function hint(g) {
+  // ---------- Basic strategy (6 decks, H17, DAS, late surrender, peek) ----------
+  // Table-driven. Each row lists the play against dealer upcards 2,3,4,5,6,7,8,9,10,A.
+  // Matches the published 4-8 deck, dealer-hits-soft-17, double-after-split, late-surrender chart
+  // (Wizard of Odds / standard "Vegas Strip" chart), with the rules this game actually deals:
+  // double on any two cards (also after a split), split to 4 hands, split aces get one card
+  // and cannot be resplit or doubled, late surrender on the first two cards of an unsplit hand.
+  //   H  = Hit              S  = Stand
+  //   Dh = Double, else Hit Ds = Double, else Stand
+  //   P  = Split            Rh = Surrender, else Hit   Rs = Surrender, else Stand
+  //   Rp = Surrender, else Split
+  const DEALER_UPS = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "A"];
+  const row = (s) => s.trim().split(/\s+/);
+  const STRATEGY = {
+    //          2  3  4  5  6  7  8  9  10 A
+    hard: {
+      8:  row("H  H  H  H  H  H  H  H  H  H"),   // 8 and lower always hit
+      9:  row("H  Dh Dh Dh Dh H  H  H  H  H"),
+      10: row("Dh Dh Dh Dh Dh Dh Dh Dh H  H"),
+      11: row("Dh Dh Dh Dh Dh Dh Dh Dh Dh Dh"),  // H17: double 11 even vs an ace
+      12: row("H  H  S  S  S  H  H  H  H  H"),
+      13: row("S  S  S  S  S  H  H  H  H  H"),
+      14: row("S  S  S  S  S  H  H  H  H  H"),
+      15: row("S  S  S  S  S  H  H  H  Rh Rh"),  // H17: also surrender vs ace
+      16: row("S  S  S  S  S  H  H  Rh Rh Rh"),
+      17: row("S  S  S  S  S  S  S  S  S  Rs"),  // H17: surrender hard 17 vs ace
+    },
+    soft: { // keyed by the soft total (A,2 = 13 ... A,9 = 20)
+      13: row("H  H  H  Dh Dh H  H  H  H  H"),
+      14: row("H  H  H  Dh Dh H  H  H  H  H"),
+      15: row("H  H  Dh Dh Dh H  H  H  H  H"),
+      16: row("H  H  Dh Dh Dh H  H  H  H  H"),
+      17: row("H  Dh Dh Dh Dh H  H  H  H  H"),
+      18: row("Ds Ds Ds Ds Ds S  S  H  H  H"),   // H17: A,7 doubles vs 2 too
+      19: row("S  S  S  S  Ds S  S  S  S  S"),   // H17: A,8 doubles vs 6
+      20: row("S  S  S  S  S  S  S  S  S  S"),
+    },
+    pair: { // keyed by pair rank value (A = 11); 5s play as hard 10, 10s as hard 20
+      2:  row("P  P  P  P  P  P  H  H  H  H"),   // DAS: split 2s vs 2-7
+      3:  row("P  P  P  P  P  P  H  H  H  H"),
+      4:  row("H  H  H  P  P  H  H  H  H  H"),   // DAS: split 4s vs 5-6
+      5:  row("Dh Dh Dh Dh Dh Dh Dh Dh H  H"),
+      6:  row("P  P  P  P  P  H  H  H  H  H"),   // DAS: split 6s vs 2-6
+      7:  row("P  P  P  P  P  P  H  H  H  H"),
+      8:  row("P  P  P  P  P  P  P  P  P  Rp"),  // H17: surrender 8,8 vs ace
+      9:  row("P  P  P  P  P  S  P  P  S  S"),
+      10: row("S  S  S  S  S  S  S  S  S  S"),
+      11: row("P  P  P  P  P  P  P  P  P  P"),
+    },
+  };
+  const CODE_LABEL = {
+    H: "Hit", S: "Stand", Dh: "Double, else Hit", Ds: "Double, else Stand", P: "Split",
+    Rh: "Surrender, else Hit", Rs: "Surrender, else Stand", Rp: "Surrender, else Split",
+  };
+
+  function upIndex(up) { return up === 11 ? 9 : up - 2; }
+
+  // Chart lookup for a hand state. kind: "pair" | "soft" | "hard"; key: the row key.
+  function chartCode(kind, key, up) {
+    if (kind === "hard") {
+      if (key >= 18) return "S";                 // 18+ always stands
+      key = Math.max(8, key);                    // 4-8 always hit
+    } else if (kind === "soft") {
+      key = Math.max(13, Math.min(20, key));     // A,A as 12 plays like A,2; soft 21 stands
+    }
+    const r = STRATEGY[kind][key];
+    return r ? r[upIndex(up)] : null;
+  }
+
+  // Which chart row applies to this hand, given the actions available right now.
+  function classify(h, a) {
+    const t = handTotal(h.cards);
+    if (a.split) {
+      const v = cardValue(h.cards[0].r);
+      return { kind: "pair", key: v === 1 ? 11 : v, total: t.total, soft: false };
+    }
+    if (t.soft) return { kind: "soft", key: t.total, total: t.total, soft: true };
+    return { kind: "hard", key: t.total, total: t.total, soft: false };
+  }
+
+  // Resolve a chart code to a legal move given what the player can actually do.
+  // Returns the move plus the fallback situation so the UI can explain it.
+  function resolve(code, a) {
+    switch (code) {
+      case "H": return "hit";
+      case "S": return "stand";
+      case "P": return "split";
+      case "Dh": return a.double ? "double" : "hit";
+      case "Ds": return a.double ? "double" : "stand";
+      case "Rh": return a.surrender ? "surrender" : "hit";
+      case "Rs": return a.surrender ? "surrender" : "stand";
+      case "Rp": return a.surrender ? "surrender" : "split";
+    }
+    return "hit";
+  }
+
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+  // One-line reason for the play (kept short for a phone screen).
+  function reasonFor(info, up, code, move) {
+    const upTxt = up === 11 ? "an Ace" : (up === 8 ? "an " : "a ") + up;
+    const weak = up >= 2 && up <= 6, strong = up >= 7;
+    const k = info.key;
+    if (info.kind === "pair") {
+      if (k === 11) return "Always split Aces: two shots at 21 instead of a weak soft 12.";
+      if (k === 8) return move === "surrender" ? "8,8 vs an Ace (dealer hits soft 17): surrender beats splitting, which loses more." : "Always split 8s: a 16 is the worst hand; two 8s are two fresh starts.";
+      if (k === 10) return "20 is almost unbeatable. Never split tens.";
+      if (k === 5) return move === "double" ? "Never split 5s: treat them as a hard 10 and double." : "Never split 5s: hit as a hard 10.";
+      if (k === 9) {
+        if (up === 7) return "9,9 vs 7: your 18 already beats the dealer's likely 17, so stand.";
+        if (up >= 10) return "9,9 vs " + (up === 11 ? "an Ace" : "a 10") + ": 18 is solid here, so stand and don't split.";
+        return "Split 9s vs 2-6 and 8-9: two hands at 9 beat one 18 against these cards.";
+      }
+      if (move === "split") {
+        if (k === 7) return "Split 7s vs 2-7: the dealer is weak or at best average, and 14 is poor.";
+        if (k === 6) return "Split 6s vs 2-6: the dealer is likely to bust, and 12 is poor.";
+        if (k === 4) return "Split 4s only vs 5-6 (double-after-split makes it worth it).";
+        return "Split " + k + "s vs 2-7: you get two hands against a weak dealer card.";
+      }
+      if (k === 4) return "Don't split 4s here: hit the 8 and keep it as one hand.";
+      return "Don't split " + k + "s against " + upTxt + ": hit instead (the dealer is too strong).";
+    }
+    if (move === "surrender") {
+      if (info.total === 17) return "Hard 17 vs an Ace (dealer hits soft 17): surrendering saves a little over standing.";
+      return "A hard " + info.total + " vs " + upTxt + " wins too rarely: giving up half the bet loses less than playing it on.";
+    }
+    if (move === "double" || code === "Dh" || code === "Ds") {
+      if (info.kind === "hard") {
+        if (info.total === 11) return up === 11 ? "11 vs an Ace: double, because the dealer hitting soft 17 makes it worth it." : "11 is the best doubling total: one card often makes 21 or 20.";
+        if (info.total === 10) return "Double 10 vs 2-9: you beat most dealer hands when you reach 20 or 21.";
+        return "Double 9 vs 3-6: the dealer is weak, so put more money out.";
+      }
+      if (info.total === 18) return "Soft 18 vs " + upTxt + ": double. You can't bust, and the dealer is weak.";
+      if (info.total === 19) return "Soft 19 vs 6: double because the dealer hits soft 17 and is vulnerable.";
+      return "Soft " + info.total + " vs " + upTxt + ": double, since you can't bust with one card against a weak dealer.";
+    }
+    if (info.kind === "soft") {
+      if (info.total >= 20) return "Soft 20 is great: stand.";
+      if (info.total === 19) return "Soft 19 is strong: stand.";
+      if (info.total === 18) return move === "stand" ? "Soft 18 vs " + upTxt + ": 18 is good enough here, so stand." : "Soft 18 vs " + upTxt + ": 18 loses to the dealer's likely 19+, so hit.";
+      return "Soft " + info.total + ": you can't bust, so hit to improve.";
+    }
+    const x = info.total;
+    if (move === "stand") {
+      if (x >= 17) return "Hard " + x + " or better: stand. Hitting risks a bust for little gain.";
+      if (x === 12) return "12 vs " + upTxt + ": stand and let the dealer bust.";
+      return x + " vs " + upTxt + ": the dealer is likely to bust, so don't risk it.";
+    }
+    if (x <= 8) return x + " can't bust: always hit.";
+    if (x === 12) return "12 vs " + upTxt + ": the dealer busts less often here, so hit.";
+    if (strong) return x + " vs " + upTxt + ": the dealer likely has 17+, so you must improve.";
+    return "Hit " + x + " vs " + upTxt + ".";
+  }
+
+  // Full basic-strategy answer for the active hand, or null when it's not the player's turn.
+  // { move, code, label, reason, fallback, hand, up }
+  //   move  = what to do right now ("hit"|"stand"|"double"|"split"|"surrender"), already legal
+  //   label = the chart's name for the play, e.g. "Double, else Hit"
+  function recommend(g) {
     const h = activeHand(g);
     if (!h) return null;
     const a = actions(g);
     const upR = g.dealer[0].r;
     const up = upR === "A" ? 11 : cardValue(upR);
-    const t = handTotal(h.cards);
-    const D = (fallback) => (a.double ? "double" : fallback);
+    const info = classify(h, a);
+    const code = chartCode(info.kind, info.key, up);
+    const move = resolve(code, a);
+    // Fallbacks ("Double, else Hit", "Surrender, else Stand", ...) kick in when the primary play isn't legal now.
+    const usedFallback = code[0] === "D" ? !a.double : code[0] === "R" ? !a.surrender : false;
+    let reason = reasonFor(info, up, code, move);
+    if (usedFallback) {
+      reason += " (" + (code[0] === "D" ? "Double" : "Surrender") + " isn't available now, so " + move + ".)";
+    }
+    return { move, code, label: CODE_LABEL[code] || cap(move), reason, fallback: usedFallback, up, kind: info.kind, key: info.key };
+  }
 
-    if (a.surrender && !t.soft) {
-      const pair8 = cardValue(h.cards[0].r) === 8 && cardValue(h.cards[1].r) === 8;
-      // H17 late surrender: 8,8 vs A; hard 17 vs A; 16 vs 9/10/A; 15 vs 10/A.
-      if (pair8) { if (up === 11) return "surrender"; }
-      else if ((t.total === 17 && up === 11) || (t.total === 16 && up >= 9) || (t.total === 15 && up >= 10)) return "surrender";
-    }
-    if (a.split) {
-      const v = cardValue(h.cards[0].r);
-      const p = v === 1 ? 11 : v;
-      let s = false;
-      if (p === 11 || p === 8) s = true;
-      else if (p === 9) s = up <= 9 && up !== 7;
-      else if (p === 7 || p === 3 || p === 2) s = up <= 7;
-      else if (p === 6) s = up <= 6;
-      else if (p === 4) s = up === 5 || up === 6;
-      if (s) return "split";
-    }
-    if (t.soft) {
-      const x = t.total;
-      if (x >= 20) return "stand";
-      if (x === 19) return up === 6 ? D("stand") : "stand";
-      if (x === 18) {
-        if (up <= 6) return D("stand");
-        if (up <= 8) return "stand";
-        return "hit";
-      }
-      if (x === 17) return up >= 3 && up <= 6 ? D("hit") : "hit";
-      if (x === 16 || x === 15) return up >= 4 && up <= 6 ? D("hit") : "hit";
-      return up >= 5 && up <= 6 ? D("hit") : "hit"; // 13, 14
-    }
-    const x = t.total;
-    if (x >= 17) return "stand";
-    if (x >= 13) return up <= 6 ? "stand" : "hit";
-    if (x === 12) return up >= 4 && up <= 6 ? "stand" : "hit";
-    if (x === 11) return D("hit"); // H17: double 11 vs everything, including A
-    if (x === 10) return up <= 9 ? D("hit") : "hit";
-    if (x === 9) return up >= 3 && up <= 6 ? D("hit") : "hit";
-    return "hit";
+  // Back-compat: the bare move, used by the optional hint pill and the simulators.
+  function hint(g) {
+    const r = recommend(g);
+    return r ? r.move : null;
   }
 
   const api = {
@@ -768,7 +939,8 @@ button:disabled { opacity: 0.38; cursor: default; }
     cardValue, handTotal, dealerShouldHit, isBlackjack, totalLabel,
     createGame, reshuffle, needsShuffle, shoeUsedFraction, stack,
     canDeal, deal, canInsure, insurance, actions, activeHand,
-    hit, stand, double, split, surrender, resetBankroll, hint, newStats,
+    hit, stand, double, split, surrender, resetBankroll, hint, recommend, newStats,
+    STRATEGY, DEALER_UPS, CODE_LABEL, chartCode,
   };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.GrayBJ = api;
@@ -928,7 +1100,8 @@ button:disabled { opacity: 0.38; cursor: default; }
   const SUIT = { S: "\u2660\uFE0E", H: "\u2665\uFE0E", D: "\u2666\uFE0E", C: "\u2663\uFE0E" };
   const $ = (s) => document.querySelector(s);
 
-  let game, settings = { hint: false, hintDismissed: false, sound: true };
+  let game, settings = { hint: false, hintDismissed: false, sound: true, training: false, trainStats: { correct: 0, total: 0 } };
+  let coachFb = null; // { ok, text } feedback for the last graded move (not persisted)
   let soundedRound = -1; // stats.rounds value whose result sound already played
   let bet = 0;
   let busy = false;
@@ -1157,6 +1330,13 @@ button:disabled { opacity: 0.38; cursor: default; }
     $("#sound-switch").setAttribute("aria-checked", String(!!settings.sound));
   }
 
+  function applyTraining() {
+    const on = !!settings.training;
+    $("#train-btn").setAttribute("aria-pressed", String(on));
+    $("#train-btn").setAttribute("aria-label", on ? "Training mode on" : "Training mode off");
+    $("#train-switch").setAttribute("aria-checked", String(on));
+  }
+
   function resultText(h) {
     return ({ win: "Win", blackjack: "Blackjack", lose: "Lose", bust: "Bust", push: "Push", surrender: "Surrender" })[h.result];
   }
@@ -1189,19 +1369,71 @@ button:disabled { opacity: 0.38; cursor: default; }
     }
     const pill = $("#hint");
     pill.hidden = true;
-    document.querySelectorAll("#p-play .btn").forEach((b) => b.classList.remove("suggest"));
+    document.querySelectorAll("#p-play .btn, #p-ins .btn").forEach((b) => b.classList.remove("suggest"));
+    let rec = null, insAdvice = false;
     if (phase === "player") {
       const a = B.actions(g);
       for (const k of ["hit", "stand", "double", "split", "surrender"]) $("#a-" + k).disabled = animating || !a[k];
-      if (settings.hint && !animating) {
-        const h = B.hint(g);
-        if (h) {
-          pill.hidden = false;
-          pill.textContent = "Basic strategy: " + h.charAt(0).toUpperCase() + h.slice(1);
-          $("#a-" + h).classList.add("suggest");
-        }
+      if ((settings.training || settings.hint) && !animating) rec = B.recommend(g);
+    } else if (phase === "insurance" && settings.training && !animating) {
+      insAdvice = true;
+    }
+    if (rec) {
+      $("#a-" + rec.move).classList.add("suggest");
+      if (!settings.training) {
+        pill.hidden = false;
+        pill.textContent = "Basic strategy: " + rec.move.charAt(0).toUpperCase() + rec.move.slice(1);
       }
     }
+    if (insAdvice) $("#ins-no").classList.add("suggest");
+    renderCoach(rec, insAdvice);
+  }
+
+  // ---------- training coach ----------
+  const capW = (w) => w.charAt(0).toUpperCase() + w.slice(1);
+  function trainAccText() {
+    const t = settings.trainStats;
+    return t.total ? "Accuracy <b>" + t.correct + "/" + t.total + " \u00b7 " + Math.round((t.correct / t.total) * 100) + "%</b>" : "Accuracy <b>\u2014</b>";
+  }
+  function renderCoach(rec, insAdvice) {
+    const box = $("#coach");
+    box.hidden = !settings.training;
+    if (!settings.training) return;
+    $("#coach-acc").innerHTML = trainAccText();
+    const fb = $("#coach-fb");
+    fb.hidden = !coachFb;
+    if (coachFb) { fb.className = "coach-fb " + (coachFb.ok ? "ok" : "bad"); fb.textContent = coachFb.text; }
+    const r = $("#coach-rec");
+    if (rec) {
+      r.hidden = false;
+      $("#coach-move").textContent = rec.fallback ? capW(rec.move) : rec.label;
+      $("#coach-why").textContent = rec.reason;
+    } else if (insAdvice) {
+      r.hidden = false;
+      $("#coach-move").textContent = "No thanks";
+      $("#coach-why").textContent = INS_WHY;
+    } else {
+      r.hidden = true;
+    }
+  }
+  const INS_WHY = "Never take insurance (or even money): it's a losing side bet, about a 7% house edge.";
+
+  // Grade a move against basic strategy. rec = recommendation made BEFORE the move.
+  function grade(rec, chosen) {
+    const t = settings.trainStats;
+    const ok = chosen === rec.move;
+    t.total++; if (ok) t.correct++;
+    coachFb = ok
+      ? { ok: true, text: "\u2713 Correct: " + capW(chosen) + "." }
+      : { ok: false, text: "\u2717 " + capW(chosen) + " was wrong. Best play: " + (rec.fallback ? capW(rec.move) : rec.label) + ". " + rec.reason };
+  }
+  function gradeInsurance(took) {
+    const t = settings.trainStats;
+    const ok = !took;
+    t.total++; if (ok) t.correct++;
+    coachFb = ok
+      ? { ok: true, text: "\u2713 Correct: no insurance." }
+      : { ok: false, text: "\u2717 Insurance was wrong. " + INS_WHY };
   }
 
   function renderStats() {
@@ -1251,13 +1483,26 @@ button:disabled { opacity: 0.38; cursor: default; }
     $("#rebet").addEventListener("click", () => act(() => { clearTable(); bet = game.lastBet; S.play("chip"); S.play("chip", 70); }));
     $("#deal").addEventListener("click", () => act(() => {
       holeFlipShown = false;
+      coachFb = null;
       const amt = bet;
       if (B.deal(game, amt)) { bet = 0; S.play("deal"); }
     }));
-    $("#ins-yes").addEventListener("click", () => act(() => { B.insurance(game, true); S.play("chip"); }));
-    $("#ins-no").addEventListener("click", () => act(() => B.insurance(game, false)));
+    $("#ins-yes").addEventListener("click", () => act(() => {
+      const train = settings.training && game.phase === "insurance";
+      if (B.insurance(game, true)) { if (train) gradeInsurance(true); S.play("chip"); }
+    }));
+    $("#ins-no").addEventListener("click", () => act(() => {
+      const train = settings.training && game.phase === "insurance";
+      if (B.insurance(game, false) && train) gradeInsurance(false);
+    }));
     for (const k of ["hit", "stand", "double", "split", "surrender"]) {
-      $("#a-" + k).addEventListener("click", () => act(() => { if (B[k](game) && (k === "double" || k === "split")) S.play("chip"); }));
+      $("#a-" + k).addEventListener("click", () => act(() => {
+        const rec = settings.training ? B.recommend(game) : null; // the best play BEFORE this move
+        if (B[k](game)) {
+          if (rec) grade(rec, k);
+          if (k === "double" || k === "split") S.play("chip");
+        }
+      }));
     }
     $("#menu").addEventListener("click", () => { renderStats(); $("#sheet").classList.add("on"); });
     $("#sheet").addEventListener("click", (e) => { if (e.target.id === "sheet") $("#sheet").classList.remove("on"); });
@@ -1269,6 +1514,13 @@ button:disabled { opacity: 0.38; cursor: default; }
     const unlock = () => { if (settings.sound) S.unlock(); };
     for (const ev of ["touchend", "pointerdown", "click", "keydown"]) document.addEventListener(ev, unlock, { capture: true, passive: true });
     document.addEventListener("visibilitychange", () => { if (!document.hidden) unlock(); });
+    const toggleTraining = () => { settings.training = !settings.training; coachFb = null; applyTraining(); save(); render(); };
+    $("#train-btn").addEventListener("click", toggleTraining);
+    $("#train-switch").addEventListener("click", toggleTraining);
+    $("#coach-reset").addEventListener("click", () => {
+      if (settings.trainStats.total && !confirm("Reset your training accuracy?")) return;
+      settings.trainStats = { correct: 0, total: 0 }; coachFb = null; save(); render();
+    });
     $("#hint-switch").addEventListener("click", () => { settings.hint = !settings.hint; save(); render(); });
     $("#reset-bank").addEventListener("click", () => {
       if (game.phase === "player" || game.phase === "insurance") return;
@@ -1299,7 +1551,9 @@ button:disabled { opacity: 0.38; cursor: default; }
 
   load();
   bind();
+  if (!settings.trainStats || typeof settings.trainStats.total !== "number") settings.trainStats = { correct: 0, total: 0 };
   applySound();
+  applyTraining();
   render();
 
   if ("serviceWorker" in navigator && location.protocol !== "file:") {
